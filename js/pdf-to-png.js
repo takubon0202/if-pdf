@@ -5,7 +5,7 @@ const dropArea = document.getElementById('png-drop-area');
 const fileInput = document.getElementById('png-file-input');
 const optionsDiv = document.getElementById('png-options');
 const scaleSelect = document.getElementById('scale-select');
-const convertBtn = document.getElementById('convert-btn');
+const reconvertBtn = document.getElementById('convert-btn');
 const progressDiv = document.getElementById('png-progress');
 const progressFill = document.getElementById('png-progress-fill');
 const progressText = document.getElementById('png-progress-text');
@@ -15,6 +15,7 @@ const downloadZipBtn = document.getElementById('download-zip-btn');
 
 let selectedFile = null;
 let pngBlobs = [];
+let isConverting = false;
 
 // Drag & Drop
 dropArea.addEventListener('dragover', e => {
@@ -35,10 +36,10 @@ dropArea.addEventListener('drop', e => {
   }
 });
 
+// Click to open file dialog — stop propagation from label to prevent double dialog
 dropArea.addEventListener('click', e => {
-  if (e.target.tagName !== 'INPUT') {
-    fileInput.click();
-  }
+  if (e.target.closest('.file-label')) return;
+  fileInput.click();
 });
 
 fileInput.addEventListener('change', () => {
@@ -49,26 +50,26 @@ fileInput.addEventListener('change', () => {
 
 function handleFile(file) {
   selectedFile = file;
-  dropArea.querySelector('p').textContent = `選択済み: ${file.name}`;
-  optionsDiv.style.display = 'flex';
-  resultsDiv.innerHTML = '';
-  downloadAllDiv.style.display = 'none';
-  pngBlobs = [];
+  convertPdf();
 }
 
-convertBtn.addEventListener('click', async () => {
-  if (!selectedFile) return;
+async function convertPdf() {
+  if (!selectedFile || isConverting) return;
+  isConverting = true;
 
   const scale = parseFloat(scaleSelect.value);
   const arrayBuffer = await selectedFile.arrayBuffer();
 
+  // Hide drop area, show progress
+  dropArea.style.display = 'none';
+  optionsDiv.style.display = 'flex';
   progressDiv.style.display = 'block';
   progressFill.style.width = '0%';
   progressText.textContent = '読み込み中...';
   resultsDiv.innerHTML = '';
   downloadAllDiv.style.display = 'none';
   pngBlobs = [];
-  convertBtn.disabled = true;
+  reconvertBtn.disabled = true;
 
   try {
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -89,7 +90,8 @@ convertBtn.addEventListener('click', async () => {
       await page.render({ canvasContext: ctx, viewport }).promise;
 
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      pngBlobs.push({ blob, name: `${selectedFile.name.replace('.pdf', '')}_page${i}.png` });
+      const baseName = selectedFile.name.replace(/\.pdf$/i, '');
+      pngBlobs.push({ blob, name: `${baseName}_page${i}.png` });
 
       const url = URL.createObjectURL(blob);
       const card = document.createElement('div');
@@ -98,7 +100,7 @@ convertBtn.addEventListener('click', async () => {
         <img src="${url}" alt="Page ${i}">
         <div class="card-footer">
           <span>ページ ${i}</span>
-          <a href="${url}" download="${selectedFile.name.replace('.pdf', '')}_page${i}.png" class="btn small primary">保存</a>
+          <a href="${url}" download="${baseName}_page${i}.png" class="btn small primary">保存</a>
         </div>
       `;
       resultsDiv.appendChild(card);
@@ -111,8 +113,28 @@ convertBtn.addEventListener('click', async () => {
   } catch (err) {
     progressText.textContent = `エラー: ${err.message}`;
   } finally {
-    convertBtn.disabled = false;
+    isConverting = false;
+    reconvertBtn.disabled = false;
   }
+}
+
+// Re-convert with different scale or new file
+reconvertBtn.addEventListener('click', () => {
+  if (selectedFile) {
+    convertPdf();
+  }
+});
+
+// "別のファイルを選択" resets to upload view
+document.getElementById('png-reset-btn').addEventListener('click', () => {
+  selectedFile = null;
+  pngBlobs = [];
+  fileInput.value = '';
+  dropArea.style.display = '';
+  optionsDiv.style.display = 'none';
+  progressDiv.style.display = 'none';
+  resultsDiv.innerHTML = '';
+  downloadAllDiv.style.display = 'none';
 });
 
 downloadZipBtn.addEventListener('click', async () => {
@@ -128,7 +150,7 @@ downloadZipBtn.addEventListener('click', async () => {
   const url = URL.createObjectURL(content);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${selectedFile.name.replace('.pdf', '')}_pages.zip`;
+  a.download = `${selectedFile.name.replace(/\.pdf$/i, '')}_pages.zip`;
   a.click();
   URL.revokeObjectURL(url);
 

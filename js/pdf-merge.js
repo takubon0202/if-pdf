@@ -10,9 +10,9 @@
   const progressFill = document.getElementById('merge-progress-fill');
   const progressText = document.getElementById('merge-progress-text');
 
-  let pdfFiles = []; // { file, name, pageCount }
+  let pdfFiles = [];
 
-  // Drag & Drop
+  // Drag & Drop on upload area
   dropArea.addEventListener('dragover', e => {
     e.preventDefault();
     dropArea.classList.add('dragover');
@@ -29,10 +29,10 @@
     if (files.length > 0) addFiles(files);
   });
 
+  // Click to open file dialog — stop propagation from label
   dropArea.addEventListener('click', e => {
-    if (e.target.tagName !== 'INPUT') {
-      fileInput.click();
-    }
+    if (e.target.closest('.file-label')) return;
+    fileInput.click();
   });
 
   fileInput.addEventListener('change', () => {
@@ -72,9 +72,12 @@
 
     if (pdfFiles.length === 0) {
       actionsDiv.style.display = 'none';
+      dropArea.style.display = '';
       return;
     }
 
+    // Hide the large drop area once files are added
+    dropArea.style.display = 'none';
     actionsDiv.style.display = 'flex';
 
     pdfFiles.forEach((item, index) => {
@@ -108,6 +111,7 @@
 
       div.addEventListener('drop', e => {
         e.preventDefault();
+        e.stopPropagation();
         const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
         const toIndex = index;
         if (fromIndex !== toIndex) {
@@ -135,6 +139,7 @@
     }
 
     mergeBtn.disabled = true;
+    addMoreBtn.disabled = true;
     progressDiv.style.display = 'block';
     progressFill.style.width = '0%';
     progressText.textContent = '結合中...';
@@ -167,6 +172,7 @@
       progressText.textContent = `エラー: ${err.message}`;
     } finally {
       mergeBtn.disabled = false;
+      addMoreBtn.disabled = false;
     }
   });
 })();
