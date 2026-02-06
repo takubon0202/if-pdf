@@ -161,6 +161,17 @@ h1 {
   font-size: 0.95rem;
 }
 
+.options input[type="range"] {
+  vertical-align: middle;
+  accent-color: #4a6cf7;
+}
+
+.options #quality-value {
+  font-variant-numeric: tabular-nums;
+  min-width: 3em;
+  display: inline-block;
+}
+
 /* Progress */
 .progress-wrapper {
   margin: 16px 0;

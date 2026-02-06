@@ -4,6 +4,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 const dropArea = document.getElementById('png-drop-area');
 const fileInput = document.getElementById('png-file-input');
 const optionsDiv = document.getElementById('png-options');
+const formatSelect = document.getElementById('format-select');
+const qualityLabel = document.getElementById('quality-label');
+const qualityRange = document.getElementById('quality-range');
+const qualityValue = document.getElementById('quality-value');
 const scaleSelect = document.getElementById('scale-select');
 const reconvertBtn = document.getElementById('convert-btn');
 const progressDiv = document.getElementById('png-progress');
@@ -13,9 +17,25 @@ const resultsDiv = document.getElementById('png-results');
 const downloadAllDiv = document.getElementById('png-download-all');
 const downloadZipBtn = document.getElementById('download-zip-btn');
 
+const FORMAT_CONFIG = {
+  png:  { mime: 'image/png',  ext: 'png',  hasQuality: false },
+  jpeg: { mime: 'image/jpeg', ext: 'jpg',  hasQuality: true },
+  webp: { mime: 'image/webp', ext: 'webp', hasQuality: true },
+};
+
 let selectedFile = null;
-let pngBlobs = [];
+let imageBlobs = [];
 let isConverting = false;
+
+// Format select — show/hide quality slider
+formatSelect.addEventListener('change', () => {
+  const fmt = FORMAT_CONFIG[formatSelect.value];
+  qualityLabel.style.display = fmt.hasQuality ? '' : 'none';
+});
+
+qualityRange.addEventListener('input', () => {
+  qualityValue.textContent = `${qualityRange.value}%`;
+});
 
 // Drag & Drop
 dropArea.addEventListener('dragover', e => {
@@ -36,7 +56,6 @@ dropArea.addEventListener('drop', e => {
   }
 });
 
-// Click to open file dialog — stop propagation from label to prevent double dialog
 dropArea.addEventListener('click', e => {
   if (e.target.closest('.file-label')) return;
   fileInput.click();
@@ -58,9 +77,10 @@ async function convertPdf() {
   isConverting = true;
 
   const scale = parseFloat(scaleSelect.value);
+  const fmt = FORMAT_CONFIG[formatSelect.value];
+  const quality = fmt.hasQuality ? parseInt(qualityRange.value) / 100 : undefined;
   const arrayBuffer = await selectedFile.arrayBuffer();
 
-  // Hide drop area, show progress
   dropArea.style.display = 'none';
   optionsDiv.style.display = 'flex';
   progressDiv.style.display = 'block';
@@ -68,7 +88,7 @@ async function convertPdf() {
   progressText.textContent = '読み込み中...';
   resultsDiv.innerHTML = '';
   downloadAllDiv.style.display = 'none';
-  pngBlobs = [];
+  imageBlobs = [];
   reconvertBtn.disabled = true;
 
   try {
@@ -87,11 +107,18 @@ async function convertPdf() {
       canvas.height = viewport.height;
       const ctx = canvas.getContext('2d');
 
+      // JPEG/WebP need white background (transparent → white)
+      if (fmt.mime !== 'image/png') {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
       await page.render({ canvasContext: ctx, viewport }).promise;
 
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, fmt.mime, quality));
       const baseName = selectedFile.name.replace(/\.pdf$/i, '');
-      pngBlobs.push({ blob, name: `${baseName}_page${i}.png` });
+      const fileName = `${baseName}_page${i}.${fmt.ext}`;
+      imageBlobs.push({ blob, name: fileName });
 
       const url = URL.createObjectURL(blob);
       const card = document.createElement('div');
@@ -100,14 +127,14 @@ async function convertPdf() {
         <img src="${url}" alt="Page ${i}">
         <div class="card-footer">
           <span>ページ ${i}</span>
-          <a href="${url}" download="${baseName}_page${i}.png" class="btn small primary">保存</a>
+          <a href="${url}" download="${fileName}" class="btn small primary">保存</a>
         </div>
       `;
       resultsDiv.appendChild(card);
     }
 
-    progressText.textContent = `完了! ${totalPages} ページを変換しました`;
-    if (pngBlobs.length > 1) {
+    progressText.textContent = `完了! ${totalPages} ページを ${fmt.ext.toUpperCase()} に変換しました`;
+    if (imageBlobs.length > 1) {
       downloadAllDiv.style.display = 'block';
     }
   } catch (err) {
@@ -118,17 +145,15 @@ async function convertPdf() {
   }
 }
 
-// Re-convert with different scale or new file
 reconvertBtn.addEventListener('click', () => {
   if (selectedFile) {
     convertPdf();
   }
 });
 
-// "別のファイルを選択" resets to upload view
 document.getElementById('png-reset-btn').addEventListener('click', () => {
   selectedFile = null;
-  pngBlobs = [];
+  imageBlobs = [];
   fileInput.value = '';
   dropArea.style.display = '';
   optionsDiv.style.display = 'none';
@@ -142,7 +167,7 @@ downloadZipBtn.addEventListener('click', async () => {
   downloadZipBtn.textContent = 'ZIP作成中...';
 
   const zip = new JSZip();
-  for (const { blob, name } of pngBlobs) {
+  for (const { blob, name } of imageBlobs) {
     zip.file(name, blob);
   }
 

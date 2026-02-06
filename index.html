@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF ツール - PNG変換 & PDF結合</title>
+  <title>PDF ツール - 画像変換 & PDF結合</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
     <h1>PDF ツール</h1>
 
     <div class="tabs">
-      <button class="tab active" data-tab="png">PDF → PNG 変換</button>
+      <button class="tab active" data-tab="png">PDF → 画像変換</button>
       <button class="tab" data-tab="merge">PDF 結合</button>
     </div>
 
@@ -26,6 +26,17 @@
       </div>
 
       <div class="options" id="png-options" style="display:none;">
+        <label>形式:
+          <select id="format-select">
+            <option value="png" selected>PNG</option>
+            <option value="jpeg">JPEG</option>
+            <option value="webp">WebP</option>
+          </select>
+        </label>
+        <label id="quality-label" style="display:none;">品質:
+          <input type="range" id="quality-range" min="10" max="100" value="90" step="5">
+          <span id="quality-value">90%</span>
+        </label>
         <label>解像度:
           <select id="scale-select">
             <option value="1">1x (72 DPI)</option>
@@ -33,7 +44,7 @@
             <option value="3">3x (216 DPI)</option>
           </select>
         </label>
-        <button id="convert-btn" class="btn secondary">解像度を変えて再変換</button>
+        <button id="convert-btn" class="btn secondary">設定を変えて再変換</button>
         <button id="png-reset-btn" class="btn secondary">別のファイルを選択</button>
       </div>
 
