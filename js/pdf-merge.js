@@ -1,178 +1,71 @@
 (function () {
   const dropArea = document.getElementById('merge-drop-area');
-  const fileInput = document.getElementById('merge-file-input');
   const fileListDiv = document.getElementById('merge-file-list');
   const actionsDiv = document.getElementById('merge-actions');
   const addMoreBtn = document.getElementById('add-more-btn');
   const addMoreInput = document.getElementById('merge-add-input');
   const mergeBtn = document.getElementById('merge-btn');
   const progressDiv = document.getElementById('merge-progress');
-  const progressFill = document.getElementById('merge-progress-fill');
-  const progressText = document.getElementById('merge-progress-text');
 
   let pdfFiles = [];
 
-  // Drag & Drop on upload area
-  dropArea.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropArea.classList.add('dragover');
+  setupDropArea('merge-drop-area', 'merge-file-input', files => {
+    addFiles(files.filter(f => f.type === 'application/pdf'));
   });
-
-  dropArea.addEventListener('dragleave', () => {
-    dropArea.classList.remove('dragover');
-  });
-
-  dropArea.addEventListener('drop', e => {
-    e.preventDefault();
-    dropArea.classList.remove('dragover');
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf');
-    if (files.length > 0) addFiles(files);
-  });
-
-  // Click to open file dialog — stop propagation from label
-  dropArea.addEventListener('click', e => {
-    if (e.target.closest('.file-label')) return;
-    fileInput.click();
-  });
-
-  fileInput.addEventListener('change', () => {
-    const files = Array.from(fileInput.files).filter(f => f.type === 'application/pdf');
-    if (files.length > 0) addFiles(files);
-    fileInput.value = '';
-  });
-
   addMoreBtn.addEventListener('click', () => addMoreInput.click());
-
   addMoreInput.addEventListener('change', () => {
-    const files = Array.from(addMoreInput.files).filter(f => f.type === 'application/pdf');
-    if (files.length > 0) addFiles(files);
+    addFiles(Array.from(addMoreInput.files).filter(f => f.type === 'application/pdf'));
     addMoreInput.value = '';
   });
 
   async function addFiles(files) {
     for (const file of files) {
-      const arrayBuffer = await file.arrayBuffer();
       try {
-        const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
-        pdfFiles.push({
-          file,
-          name: file.name,
-          pageCount: pdf.getPageCount(),
-          data: arrayBuffer,
-        });
-      } catch {
-        alert(`"${file.name}" を読み込めませんでした。`);
-      }
+        const data = await file.arrayBuffer();
+        const pdf = await PDFLib.PDFDocument.load(data);
+        pdfFiles.push({ name: file.name, pageCount: pdf.getPageCount(), data });
+      } catch { alert(`"${file.name}" を読み込めませんでした。`); }
     }
-    renderFileList();
+    renderList();
   }
 
-  function renderFileList() {
+  function renderList() {
     fileListDiv.innerHTML = '';
-
-    if (pdfFiles.length === 0) {
-      actionsDiv.style.display = 'none';
-      dropArea.style.display = '';
-      return;
-    }
-
-    // Hide the large drop area once files are added
-    dropArea.style.display = 'none';
-    actionsDiv.style.display = 'flex';
-
-    pdfFiles.forEach((item, index) => {
+    if (!pdfFiles.length) { actionsDiv.style.display = 'none'; dropArea.style.display = ''; return; }
+    dropArea.style.display = 'none'; actionsDiv.style.display = 'flex';
+    pdfFiles.forEach((item, i) => {
       const div = document.createElement('div');
-      div.className = 'file-item';
-      div.draggable = true;
-      div.dataset.index = index;
-
-      div.innerHTML = `
-        <span class="drag-handle">&#9776;</span>
-        <span class="file-name">${item.name}</span>
-        <span class="file-pages">${item.pageCount}ページ</span>
-        <button class="remove-btn" data-index="${index}">&times;</button>
-      `;
-
-      // Drag sort
-      div.addEventListener('dragstart', e => {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', index);
-        div.classList.add('dragging');
-      });
-
-      div.addEventListener('dragend', () => {
-        div.classList.remove('dragging');
-      });
-
-      div.addEventListener('dragover', e => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-      });
-
+      div.className = 'file-item'; div.draggable = true;
+      div.innerHTML = `<span class="drag-handle">&#9776;</span><span class="file-name">${item.name}</span><span class="file-pages">${item.pageCount}ページ</span><button class="remove-btn">&times;</button>`;
+      div.addEventListener('dragstart', e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', i); div.classList.add('dragging'); });
+      div.addEventListener('dragend', () => div.classList.remove('dragging'));
+      div.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
       div.addEventListener('drop', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
-        const toIndex = index;
-        if (fromIndex !== toIndex) {
-          const [moved] = pdfFiles.splice(fromIndex, 1);
-          pdfFiles.splice(toIndex, 0, moved);
-          renderFileList();
-        }
+        e.preventDefault(); e.stopPropagation();
+        const from = parseInt(e.dataTransfer.getData('text/plain'));
+        if (from !== i) { const [m] = pdfFiles.splice(from, 1); pdfFiles.splice(i, 0, m); renderList(); }
       });
-
-      // Remove button
-      div.querySelector('.remove-btn').addEventListener('click', e => {
-        e.stopPropagation();
-        pdfFiles.splice(index, 1);
-        renderFileList();
-      });
-
+      div.querySelector('.remove-btn').addEventListener('click', e => { e.stopPropagation(); pdfFiles.splice(i, 1); renderList(); });
       fileListDiv.appendChild(div);
     });
   }
 
   mergeBtn.addEventListener('click', async () => {
-    if (pdfFiles.length < 2) {
-      alert('2つ以上のPDFファイルを追加してください。');
-      return;
-    }
-
-    mergeBtn.disabled = true;
-    addMoreBtn.disabled = true;
+    if (pdfFiles.length < 2) { alert('2つ以上のPDFファイルを追加してください。'); return; }
+    mergeBtn.disabled = true; addMoreBtn.disabled = true;
     progressDiv.style.display = 'block';
-    progressFill.style.width = '0%';
-    progressText.textContent = '結合中...';
-
     try {
-      const mergedPdf = await PDFLib.PDFDocument.create();
-      const total = pdfFiles.length;
-
-      for (let i = 0; i < total; i++) {
-        progressText.textContent = `結合中... ${i + 1} / ${total} ファイル`;
-        progressFill.style.width = `${((i + 1) / total) * 100}%`;
-
-        const pdf = await PDFLib.PDFDocument.load(pdfFiles[i].data);
-        const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-        pages.forEach(page => mergedPdf.addPage(page));
+      const merged = await PDFLib.PDFDocument.create();
+      for (let i = 0; i < pdfFiles.length; i++) {
+        setProgress('merge-progress-fill', 'merge-progress-text', ((i + 1) / pdfFiles.length) * 100, `結合中... ${i + 1} / ${pdfFiles.length}`);
+        const src = await PDFLib.PDFDocument.load(pdfFiles[i].data);
+        const pages = await merged.copyPages(src, src.getPageIndices());
+        pages.forEach(p => merged.addPage(p));
       }
-
-      const pdfBytes = await mergedPdf.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'merged.pdf';
-      a.click();
-      URL.revokeObjectURL(url);
-
-      progressText.textContent = '結合完了! ダウンロードが開始されました。';
-    } catch (err) {
-      progressText.textContent = `エラー: ${err.message}`;
-    } finally {
-      mergeBtn.disabled = false;
-      addMoreBtn.disabled = false;
-    }
+      const bytes = await merged.save();
+      downloadBlob(new Blob([bytes], { type: 'application/pdf' }), 'merged.pdf');
+      setProgress('merge-progress-fill', 'merge-progress-text', 100, '結合完了!');
+    } catch (err) { setProgress('merge-progress-fill', 'merge-progress-text', 100, 'エラー: ' + err.message); }
+    finally { mergeBtn.disabled = false; addMoreBtn.disabled = false; }
   });
 })();
