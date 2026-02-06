@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF ツール - PNG変換 & PDF結合</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>PDF ツール</h1>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="png">PDF → PNG 変換</button>
+      <button class="tab" data-tab="merge">PDF 結合</button>
+    </div>
+
+    <!-- PDF → PNG 変換 -->
+    <div id="tab-png" class="tab-content active">
+      <div class="upload-area" id="png-drop-area">
+        <p>PDFファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">
+          ファイルを選択
+          <input type="file" id="png-file-input" accept=".pdf" hidden>
+        </label>
+      </div>
+
+      <div class="options" id="png-options" style="display:none;">
+        <label>解像度:
+          <select id="scale-select">
+            <option value="1">1x (72 DPI)</option>
+            <option value="2" selected>2x (144 DPI)</option>
+            <option value="3">3x (216 DPI)</option>
+          </select>
+        </label>
+        <button id="convert-btn" class="btn primary">変換する</button>
+      </div>
+
+      <div class="progress-wrapper" id="png-progress" style="display:none;">
+        <div class="progress-bar"><div class="progress-fill" id="png-progress-fill"></div></div>
+        <p class="progress-text" id="png-progress-text">変換中...</p>
+      </div>
+
+      <div id="png-results" class="results"></div>
+
+      <div id="png-download-all" style="display:none;">
+        <button id="download-zip-btn" class="btn primary">ZIP で一括ダウンロード</button>
+      </div>
+    </div>
+
+    <!-- PDF 結合 -->
+    <div id="tab-merge" class="tab-content">
+      <div class="upload-area" id="merge-drop-area">
+        <p>複数のPDFファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">
+          ファイルを選択
+          <input type="file" id="merge-file-input" accept=".pdf" multiple hidden>
+        </label>
+      </div>
+
+      <div id="merge-file-list" class="file-list"></div>
+
+      <div id="merge-actions" style="display:none;">
+        <button id="add-more-btn" class="btn secondary">ファイルを追加</button>
+        <input type="file" id="merge-add-input" accept=".pdf" multiple hidden>
+        <button id="merge-btn" class="btn primary">結合する</button>
+      </div>
+
+      <div class="progress-wrapper" id="merge-progress" style="display:none;">
+        <div class="progress-bar"><div class="progress-fill" id="merge-progress-fill"></div></div>
+        <p class="progress-text" id="merge-progress-text">結合中...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script>
+    // タブ切替
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+  <script src="js/pdf-to-png.js" type="module"></script>
+  <script src="js/pdf-merge.js"></script>
+</body>
+</html>
