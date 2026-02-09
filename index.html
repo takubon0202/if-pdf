@@ -270,7 +270,7 @@
       </div>
       <div id="wm-options" style="display:none;">
         <div class="options">
-          <label>テキスト: <input type="text" id="wm-text" class="text-input" value="CONFIDENTIAL" placeholder="透かしテキスト"></label>
+          <label>テキスト (半角英数のみ): <input type="text" id="wm-text" class="text-input" value="CONFIDENTIAL" placeholder="半角英数で入力"></label>
           <label>フォントサイズ: <input type="number" id="wm-fontsize" class="text-input" value="60" min="10" max="200" style="width:80px"></label>
           <label>透明度: <input type="range" id="wm-opacity" min="5" max="100" value="30" step="5"><span id="wm-opacity-value">30%</span></label>
           <label>角度: <input type="number" id="wm-angle" class="text-input" value="45" min="-180" max="180" style="width:80px">°</label>
@@ -297,6 +297,7 @@
           <label>画像品質: <select id="cmp-quality"><option value="0.8">高品質 (おすすめ)</option><option value="0.5">中品質</option><option value="0.3">低品質 (最小サイズ)</option></select></label>
         </div>
         <p class="info-text" id="cmp-page-info"></p>
+        <p class="info-text" style="color:#e67e22;">※ 画像として再レンダリングするため、テキストの選択・検索はできなくなります。画像が多いPDFに最適です。</p>
         <button id="cmp-btn" class="btn primary">圧縮してダウンロード</button>
       </div>
       <div class="progress-wrapper" id="cmp-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="cmp-progress-fill"></div></div><p class="progress-text" id="cmp-progress-text"></p></div>
@@ -340,7 +341,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = name; a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
     }
     function setProgress(fillId, textId, pct, text) {
       document.getElementById(fillId).style.width = pct + '%';

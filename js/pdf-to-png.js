@@ -23,7 +23,13 @@ const FORMAT_CONFIG = {
 
 let selectedFile = null;
 let imageBlobs = [];
+let objectUrls = [];
 let isConverting = false;
+
+function revokeOldUrls() {
+  objectUrls.forEach(u => URL.revokeObjectURL(u));
+  objectUrls = [];
+}
 
 formatSelect.addEventListener('change', () => {
   qualityLabel.style.display = FORMAT_CONFIG[formatSelect.value].hasQuality ? '' : 'none';
@@ -47,6 +53,7 @@ async function convertPdf() {
   optionsDiv.style.display = 'flex';
   progressDiv.style.display = 'block';
   setProgress('png-progress-fill', 'png-progress-text', 0, '読み込み中...');
+  revokeOldUrls();
   resultsDiv.innerHTML = '';
   downloadAllDiv.style.display = 'none';
   imageBlobs = [];
@@ -69,6 +76,7 @@ async function convertPdf() {
       const fileName = `${baseName}_page${i}.${fmt.ext}`;
       imageBlobs.push({ blob, name: fileName });
       const url = URL.createObjectURL(blob);
+      objectUrls.push(url);
       const card = document.createElement('div');
       card.className = 'result-card';
       card.innerHTML = `<img src="${url}" alt="Page ${i}"><div class="card-footer"><span>ページ ${i}</span><a href="${url}" download="${fileName}" class="btn small primary">保存</a></div>`;
@@ -85,6 +93,7 @@ reconvertBtn.addEventListener('click', () => { if (selectedFile) convertPdf(); }
 
 document.getElementById('png-reset-btn').addEventListener('click', () => {
   selectedFile = null; imageBlobs = [];
+  revokeOldUrls();
   dropArea.style.display = ''; optionsDiv.style.display = 'none';
   progressDiv.style.display = 'none'; resultsDiv.innerHTML = '';
   downloadAllDiv.style.display = 'none';

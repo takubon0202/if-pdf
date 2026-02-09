@@ -43,7 +43,8 @@
       div.addEventListener('drop', e => {
         e.preventDefault(); e.stopPropagation();
         const from = parseInt(e.dataTransfer.getData('text/plain'));
-        if (from !== i) { const [m] = pdfFiles.splice(from, 1); pdfFiles.splice(i, 0, m); renderList(); }
+        if (isNaN(from) || from === i) return;
+        const [m] = pdfFiles.splice(from, 1); pdfFiles.splice(i, 0, m); renderList();
       });
       div.querySelector('.remove-btn').addEventListener('click', e => { e.stopPropagation(); pdfFiles.splice(i, 1); renderList(); });
       fileListDiv.appendChild(div);

@@ -24,9 +24,14 @@ const pdfjsLib = window._pdfjsLib || await import('https://cdnjs.cloudflare.com/
     selectedPages.clear();
     dropArea.style.display = 'none';
     ui.style.display = '';
-    pageInfo.textContent = `${file.name} — ${totalPages} ページ（削除するページをクリックしてください）`;
     thumbsDiv.innerHTML = '';
     delBtn.disabled = true;
+    delBtn.textContent = '選択したページを削除してダウンロード';
+    if (totalPages < 2) {
+      pageInfo.textContent = `${file.name} — ${totalPages} ページ（1ページのPDFからは削除できません）`;
+      return;
+    }
+    pageInfo.textContent = `${file.name} — ${totalPages} ページ（削除するページをクリックしてください）`;
 
     for (let i = 1; i <= totalPages; i++) {
       const page = await pdf.getPage(i);
@@ -58,7 +63,7 @@ const pdfjsLib = window._pdfjsLib || await import('https://cdnjs.cloudflare.com/
       selectedPages.add(pageNum); div.classList.add('selected');
     }
     delBtn.disabled = selectedPages.size === 0;
-    delBtn.textContent = `${selectedPages.size} ページを削除してダウンロード`;
+    delBtn.textContent = selectedPages.size === 0 ? '選択したページを削除してダウンロード' : `${selectedPages.size} ページを削除してダウンロード`;
   }
 
   delBtn.addEventListener('click', async () => {

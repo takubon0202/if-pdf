@@ -37,7 +37,7 @@
       const doc = await PDFLib.PDFDocument.load(pdfData.data);
       const font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
       const fontSize = Math.max(6, Math.min(72, parseInt(fontsizeInput.value) || 12));
-      const startNum = parseInt(startInput.value) || 1;
+      const startNum = Math.max(1, parseInt(startInput.value) || 1);
       const position = positionSelect.value;
       const margin = 30;
 

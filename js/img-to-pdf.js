@@ -21,9 +21,11 @@
 
   async function addImages(files) {
     for (const file of files) {
-      const dataUrl = await readAsDataURL(file);
-      const dims = await getImageDims(dataUrl);
-      images.push({ name: file.name, dataUrl, width: dims.width, height: dims.height });
+      try {
+        const dataUrl = await readAsDataURL(file);
+        const dims = await getImageDims(dataUrl);
+        images.push({ name: file.name, dataUrl, width: dims.width, height: dims.height });
+      } catch { alert(`"${file.name}" を読み込めませんでした。`); }
     }
     renderList();
   }
@@ -38,9 +40,10 @@
   }
 
   function getImageDims(dataUrl) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = () => reject(new Error('画像を読み込めませんでした'));
       img.src = dataUrl;
     });
   }
@@ -59,7 +62,8 @@
       div.addEventListener('drop', e => {
         e.preventDefault(); e.stopPropagation();
         const from = parseInt(e.dataTransfer.getData('text/plain'));
-        if (from !== i) { const [m] = images.splice(from, 1); images.splice(i, 0, m); renderList(); }
+        if (isNaN(from) || from === i) return;
+        const [m] = images.splice(from, 1); images.splice(i, 0, m); renderList();
       });
       div.querySelector('.remove-btn').addEventListener('click', e => { e.stopPropagation(); images.splice(i, 1); renderList(); });
       fileListDiv.appendChild(div);

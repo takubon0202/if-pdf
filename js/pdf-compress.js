@@ -63,11 +63,18 @@ const pdfjsLib = window._pdfjsLib || await import('https://cdnjs.cloudflare.com/
       const bytes = await doc.save();
       const originalSize = pdfFile.size;
       const newSize = bytes.byteLength;
-      const reduction = Math.max(0, ((1 - newSize / originalSize) * 100)).toFixed(1);
+      const origMB = (originalSize / 1024 / 1024).toFixed(2);
+      const newMB = (newSize / 1024 / 1024).toFixed(2);
 
+      if (newSize >= originalSize) {
+        setProgress('cmp-progress-fill', 'cmp-progress-text', 100,
+          `注意: 圧縮後のサイズ (${newMB} MB) が元 (${origMB} MB) より大きくなりました。テキスト中心のPDFには効果が少ない場合があります。`);
+        return;
+      }
+      const reduction = ((1 - newSize / originalSize) * 100).toFixed(1);
       downloadBlob(new Blob([bytes], { type: 'application/pdf' }), pdfFile.name.replace(/\.pdf$/i, '_compressed.pdf'));
       setProgress('cmp-progress-fill', 'cmp-progress-text', 100,
-        `完了! ${(originalSize / 1024 / 1024).toFixed(2)} MB → ${(newSize / 1024 / 1024).toFixed(2)} MB (${reduction}% 削減)`);
+        `完了! ${origMB} MB → ${newMB} MB (${reduction}% 削減)`);
     } catch (err) { setProgress('cmp-progress-fill', 'cmp-progress-text', 100, 'エラー: ' + err.message); }
     finally { cmpBtn.disabled = false; }
   });

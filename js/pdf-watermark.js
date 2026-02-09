@@ -44,6 +44,8 @@
     if (!pdfData) return;
     const text = wmText.value.trim();
     if (!text) { alert('透かしテキストを入力してください。'); return; }
+    // Helvetica only supports basic Latin characters
+    if (/[^\x00-\x7F]/.test(text)) { alert('透かしテキストは半角英数字・記号のみ対応しています。'); return; }
 
     wmBtn.disabled = true;
     progressDiv.style.display = 'block';
@@ -56,15 +58,17 @@
       const angleDeg = parseInt(wmAngle.value) || 45;
       const angleRad = (angleDeg * Math.PI) / 180;
       const color = hexToRgb(wmColor.value);
+      const textWidth = font.widthOfTextAtSize(text, fontSize);
+      const textHeight = font.heightAtSize(fontSize);
 
       const pages = doc.getPages();
       for (let i = 0; i < pages.length; i++) {
         setProgress('wm-progress-fill', 'wm-progress-text', ((i + 1) / pages.length) * 100, `処理中... ${i + 1} / ${pages.length}`);
         const page = pages[i];
         const { width, height } = page.getSize();
-        const textWidth = font.widthOfTextAtSize(text, fontSize);
-        const x = (width - textWidth * Math.cos(angleRad)) / 2;
-        const y = (height - textWidth * Math.sin(angleRad)) / 2;
+        const cos = Math.cos(angleRad), sin = Math.sin(angleRad);
+        const x = width / 2 - (textWidth * cos - textHeight * sin) / 2;
+        const y = height / 2 - (textWidth * sin + textHeight * cos) / 2;
 
         page.drawText(text, {
           x, y, size: fontSize, font,

@@ -49,7 +49,7 @@ const pdfjsLib = window._pdfjsLib || await import('https://cdnjs.cloudflare.com/
         if (selectedPages.has(i)) { selectedPages.delete(i); div.classList.remove('selected'); }
         else { selectedPages.add(i); div.classList.add('selected'); }
         extBtn.disabled = selectedPages.size === 0;
-        extBtn.textContent = `${selectedPages.size} ページを抽出してダウンロード`;
+        extBtn.textContent = selectedPages.size === 0 ? '選択したページを抽出してダウンロード' : `${selectedPages.size} ページを抽出してダウンロード`;
       });
       thumbsDiv.appendChild(div);
     }
