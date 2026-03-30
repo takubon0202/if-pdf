@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF ツール</title>
+  <title>PDF & 画像 ツール</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <!-- ===== ツール選択画面 ===== -->
   <div id="home" class="container">
-    <h1>PDF ツール</h1>
+    <h1>PDF & 画像 ツール</h1>
     <p class="subtitle">すべてブラウザ上で完結。サーバーへのアップロード不要。</p>
 
+    <h3 class="section-title">PDF ツール</h3>
     <div class="tool-grid">
       <button class="tool-card" data-tool="pdf-to-image">
         <span class="tool-icon">🖼</span>
@@ -70,9 +71,78 @@
         <span class="tool-desc">ファイルサイズを削減</span>
       </button>
     </div>
+
+    <h3 class="section-title">画像ツール</h3>
+    <div class="tool-grid">
+      <button class="tool-card highlight" data-tool="img-upscale">
+        <span class="tool-icon">🔍</span>
+        <span class="tool-name">画像アップスケール</span>
+        <span class="tool-desc">高解像度に拡大</span>
+      </button>
+      <button class="tool-card" data-tool="img-compress">
+        <span class="tool-icon">📦</span>
+        <span class="tool-name">画像圧縮</span>
+        <span class="tool-desc">ファイルサイズを削減</span>
+      </button>
+      <button class="tool-card" data-tool="img-resize">
+        <span class="tool-icon">📐</span>
+        <span class="tool-name">画像リサイズ</span>
+        <span class="tool-desc">サイズを変更</span>
+      </button>
+      <button class="tool-card" data-tool="img-crop">
+        <span class="tool-icon">✂️</span>
+        <span class="tool-name">画像切り抜き</span>
+        <span class="tool-desc">必要な部分を切り抜き</span>
+      </button>
+      <button class="tool-card" data-tool="img-to-jpg">
+        <span class="tool-icon">🔄</span>
+        <span class="tool-name">JPGに変換</span>
+        <span class="tool-desc">画像をJPG形式に変換</span>
+      </button>
+      <button class="tool-card" data-tool="jpg-to-other">
+        <span class="tool-icon">🔄</span>
+        <span class="tool-name">JPGから変換</span>
+        <span class="tool-desc">JPGをPNG/WebPに変換</span>
+      </button>
+      <button class="tool-card" data-tool="img-rotate-tool">
+        <span class="tool-icon">🔄</span>
+        <span class="tool-name">画像回転</span>
+        <span class="tool-desc">画像の向きを回転・反転</span>
+      </button>
+      <button class="tool-card" data-tool="img-watermark-tool">
+        <span class="tool-icon">💧</span>
+        <span class="tool-name">画像透かし</span>
+        <span class="tool-desc">テキスト透かしを追加</span>
+      </button>
+      <button class="tool-card" data-tool="img-meme">
+        <span class="tool-icon">😂</span>
+        <span class="tool-name">ミームジェネレーター</span>
+        <span class="tool-desc">ミーム画像を作成</span>
+      </button>
+      <button class="tool-card" data-tool="img-editor">
+        <span class="tool-icon">🎨</span>
+        <span class="tool-name">写真エディター</span>
+        <span class="tool-desc">フィルター・調整</span>
+      </button>
+      <button class="tool-card" data-tool="img-bg-remove">
+        <span class="tool-icon">✨</span>
+        <span class="tool-name">背景削除</span>
+        <span class="tool-desc">画像の背景を削除</span>
+      </button>
+      <button class="tool-card" data-tool="img-blur-face">
+        <span class="tool-icon">🔲</span>
+        <span class="tool-name">顔モザイク</span>
+        <span class="tool-desc">顔や領域にモザイク</span>
+      </button>
+      <button class="tool-card" data-tool="html-to-img">
+        <span class="tool-icon">🌐</span>
+        <span class="tool-name">HTMLから画像</span>
+        <span class="tool-desc">HTMLを画像に変換</span>
+      </button>
+    </div>
   </div>
 
-  <!-- ===== 各ツール画面 ===== -->
+  <!-- ===== 既存 PDF ツール画面 ===== -->
 
   <!-- PDF → 画像 -->
   <div id="tool-pdf-to-image" class="tool-view" hidden>
@@ -304,8 +374,388 @@
     </div>
   </div>
 
+  <!-- ===== 新規 画像ツール画面 ===== -->
+
+  <!-- 画像アップスケール -->
+  <div id="tool-img-upscale" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>画像アップスケール</h2>
+      <p class="info-text">高品質Lanczos3アルゴリズムで画像を拡大。Multi-step処理 + シャープネス強化で鮮明な出力。</p>
+      <div class="upload-area" id="ups-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="ups-file-input" accept="image/*" hidden></label>
+      </div>
+      <div id="ups-options" style="display:none;">
+        <div class="options">
+          <label>拡大倍率: <select id="ups-scale"><option value="2" selected>2x</option><option value="4">4x</option><option value="8">8x</option></select></label>
+          <label>出力形式: <select id="ups-format"><option value="png" selected>PNG (最高品質)</option><option value="jpeg">JPEG</option><option value="webp">WebP</option></select></label>
+          <span id="ups-quality-wrap" style="display:none;"><label>品質: <input type="range" id="ups-quality" min="50" max="100" value="92" step="1"><span id="ups-quality-value">92%</span></label></span>
+        </div>
+        <div class="options">
+          <label>シャープネス: <input type="range" id="ups-sharpen" min="0" max="100" value="50" step="10"><span id="ups-sharpen-value">50%</span></label>
+          <label>ノイズ除去: <input type="range" id="ups-denoise" min="0" max="100" value="0" step="10"><span id="ups-denoise-value">0%</span></label>
+          <label>エッジ強化: <input type="range" id="ups-edge" min="0" max="100" value="30" step="10"><span id="ups-edge-value">30%</span></label>
+        </div>
+        <p class="info-text" id="ups-info"></p>
+        <div id="ups-preview" class="compare-slider-wrapper"></div>
+        <div class="action-row">
+          <button id="ups-btn" class="btn primary">アップスケールしてダウンロード</button>
+          <button id="ups-reconvert-btn" class="btn secondary">設定を変えて再実行</button>
+          <button id="ups-reset-btn" class="btn secondary">別の画像を選択</button>
+        </div>
+      </div>
+      <div class="progress-wrapper" id="ups-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="ups-progress-fill"></div></div><p class="progress-text" id="ups-progress-text"></p></div>
+    </div>
+  </div>
+
+  <!-- 画像圧縮 -->
+  <div id="tool-img-compress" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>画像圧縮</h2>
+      <div class="upload-area" id="icmp-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="icmp-file-input" accept="image/*" multiple hidden></label>
+      </div>
+      <div id="icmp-options" style="display:none;">
+        <div class="options">
+          <label>圧縮レベル: <select id="icmp-level"><option value="0.8">高品質</option><option value="0.6" selected>おすすめ</option><option value="0.3">最大圧縮</option></select></label>
+        </div>
+        <div id="icmp-file-list" class="file-list"></div>
+        <div class="action-row">
+          <button id="icmp-add-more" class="btn secondary">画像を追加</button>
+          <input type="file" id="icmp-add-input" accept="image/*" multiple hidden>
+          <button id="icmp-btn" class="btn primary">圧縮してダウンロード</button>
+        </div>
+      </div>
+      <div class="progress-wrapper" id="icmp-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="icmp-progress-fill"></div></div><p class="progress-text" id="icmp-progress-text"></p></div>
+    </div>
+  </div>
+
+  <!-- 画像リサイズ -->
+  <div id="tool-img-resize" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>画像リサイズ</h2>
+      <div class="upload-area" id="irsz-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="irsz-file-input" accept="image/*" multiple hidden></label>
+      </div>
+      <div id="irsz-options" style="display:none;">
+        <div class="options">
+          <label>モード: <select id="irsz-mode"><option value="pixels" selected>ピクセル指定</option><option value="percent">パーセント指定</option></select></label>
+          <span id="irsz-px-inputs">
+            <label>幅: <input type="number" id="irsz-width" class="text-input" style="width:100px" placeholder="幅"></label>
+            <label>高さ: <input type="number" id="irsz-height" class="text-input" style="width:100px" placeholder="高さ"></label>
+          </span>
+          <span id="irsz-pct-input" style="display:none;">
+            <label>サイズ: <input type="number" id="irsz-percent" class="text-input" value="50" min="1" max="500" style="width:80px">%</label>
+          </span>
+          <label><input type="checkbox" id="irsz-aspect" checked> 縦横比を維持</label>
+          <label>プリセット: <select id="irsz-preset"><option value="">カスタム</option><option value="1080,1080">Instagram (1080x1080)</option><option value="1200,628">Twitter (1200x628)</option><option value="1280,720">HD (1280x720)</option><option value="1920,1080">Full HD (1920x1080)</option><option value="3840,2160">4K (3840x2160)</option><option value="800,800">サムネイル (800x800)</option><option value="150,150">アイコン (150x150)</option></select></label>
+        </div>
+        <div id="irsz-file-list" class="file-list"></div>
+        <div class="action-row">
+          <button id="irsz-add-more" class="btn secondary">画像を追加</button>
+          <input type="file" id="irsz-add-input" accept="image/*" multiple hidden>
+          <button id="irsz-btn" class="btn primary">リサイズしてダウンロード</button>
+        </div>
+      </div>
+      <div class="progress-wrapper" id="irsz-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="irsz-progress-fill"></div></div><p class="progress-text" id="irsz-progress-text"></p></div>
+    </div>
+  </div>
+
+  <!-- 画像切り抜き -->
+  <div id="tool-img-crop" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>画像切り抜き</h2>
+      <div class="upload-area" id="icrp-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="icrp-file-input" accept="image/*" hidden></label>
+      </div>
+      <div id="icrp-ui" style="display:none;">
+        <div class="options">
+          <label>X: <input type="number" id="icrp-x" class="text-input" value="0" style="width:80px"></label>
+          <label>Y: <input type="number" id="icrp-y" class="text-input" value="0" style="width:80px"></label>
+          <label>幅: <input type="number" id="icrp-w" class="text-input" style="width:80px"></label>
+          <label>高さ: <input type="number" id="icrp-h" class="text-input" style="width:80px"></label>
+          <label>比率: <select id="icrp-ratio"><option value="free">自由</option><option value="1:1">1:1</option><option value="4:3">4:3</option><option value="16:9">16:9</option><option value="3:2">3:2</option></select></label>
+        </div>
+        <div id="icrp-canvas-wrapper" class="crop-canvas-wrapper">
+          <canvas id="icrp-canvas"></canvas>
+          <div id="icrp-overlay-top" class="crop-overlay"></div>
+          <div id="icrp-overlay-bottom" class="crop-overlay"></div>
+          <div id="icrp-overlay-left" class="crop-overlay"></div>
+          <div id="icrp-overlay-right" class="crop-overlay"></div>
+          <div id="icrp-selection" class="crop-selection"></div>
+        </div>
+        <p id="icrp-info" style="text-align:center;margin:6px 0;font-size:14px;color:#666;"></p>
+        <div class="action-row">
+          <button id="icrp-btn" class="btn primary">切り抜いてダウンロード</button>
+          <button id="icrp-reset-btn" class="btn secondary">別の画像を選択</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JPGに変換 -->
+  <div id="tool-img-to-jpg" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>JPGに変換</h2>
+      <div class="upload-area" id="itj-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="itj-file-input" accept="image/*" multiple hidden></label>
+      </div>
+      <div id="itj-options" style="display:none;">
+        <div class="options">
+          <label>品質: <input type="range" id="itj-quality" min="10" max="100" value="90" step="5"><span id="itj-quality-value">90%</span></label>
+        </div>
+        <div id="itj-file-list" class="file-list"></div>
+        <div class="action-row">
+          <button id="itj-add-more" class="btn secondary">画像を追加</button>
+          <input type="file" id="itj-add-input" accept="image/*" multiple hidden>
+          <button id="itj-btn" class="btn primary">JPGに変換してダウンロード</button>
+        </div>
+      </div>
+      <div class="progress-wrapper" id="itj-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="itj-progress-fill"></div></div><p class="progress-text" id="itj-progress-text"></p></div>
+    </div>
+  </div>
+
+  <!-- JPGから変換 -->
+  <div id="tool-jpg-to-other" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>JPGから変換</h2>
+      <div class="upload-area" id="jto-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="jto-file-input" accept="image/*" multiple hidden></label>
+      </div>
+      <div id="jto-options" style="display:none;">
+        <div class="options">
+          <label>変換先: <select id="jto-format"><option value="png" selected>PNG</option><option value="webp">WebP</option></select></label>
+        </div>
+        <div id="jto-file-list" class="file-list"></div>
+        <div class="action-row">
+          <button id="jto-add-more" class="btn secondary">画像を追加</button>
+          <input type="file" id="jto-add-input" accept="image/*" multiple hidden>
+          <button id="jto-btn" class="btn primary">変換してダウンロード</button>
+        </div>
+      </div>
+      <div class="progress-wrapper" id="jto-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="jto-progress-fill"></div></div><p class="progress-text" id="jto-progress-text"></p></div>
+    </div>
+  </div>
+
+  <!-- 画像回転 -->
+  <div id="tool-img-rotate-tool" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>画像回転</h2>
+      <div class="upload-area" id="irt-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="irt-file-input" accept="image/*" multiple hidden></label>
+      </div>
+      <div id="irt-ui" style="display:none;">
+        <div class="options">
+          <button id="irt-left" class="btn secondary">左90°</button>
+          <button id="irt-right" class="btn secondary">右90°</button>
+          <button id="irt-180" class="btn secondary">180°</button>
+          <button id="irt-flip-h" class="btn secondary">水平反転</button>
+          <button id="irt-flip-v" class="btn secondary">垂直反転</button>
+          <label>自由角度: <input type="number" id="irt-angle" class="text-input" value="0" min="-360" max="360" style="width:80px">°</label>
+        </div>
+        <p id="irt-batch-info" style="text-align:center;margin:8px 0;font-size:14px;color:#666;"></p>
+        <div id="irt-preview" class="img-preview-area" style="position:relative;display:inline-block;"></div>
+        <div id="irt-thumb-grid" class="thumb-grid" style="margin:12px 0;"></div>
+        <div id="irt-file-list" class="file-list"></div>
+        <div class="action-row">
+          <button id="irt-btn" class="btn primary">回転してダウンロード</button>
+          <button id="irt-reset-btn" class="btn secondary">別の画像を選択</button>
+        </div>
+      </div>
+      <div class="progress-wrapper" id="irt-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="irt-progress-fill"></div></div><p class="progress-text" id="irt-progress-text"></p></div>
+    </div>
+  </div>
+
+  <!-- 画像透かし -->
+  <div id="tool-img-watermark-tool" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>画像に透かしを追加</h2>
+      <div class="upload-area" id="iwm-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="iwm-file-input" accept="image/*" multiple hidden></label>
+      </div>
+      <div id="iwm-options" style="display:none;">
+        <div class="options">
+          <label>テキスト: <input type="text" id="iwm-text" class="text-input" value="SAMPLE" placeholder="透かしテキスト"></label>
+          <label>サイズ: <input type="number" id="iwm-fontsize" class="text-input" value="48" min="10" max="200" style="width:80px"></label>
+          <label>透明度: <input type="range" id="iwm-opacity" min="5" max="100" value="30" step="5"><span id="iwm-opacity-value">30%</span></label>
+          <label>角度: <input type="number" id="iwm-angle" class="text-input" value="-30" min="-180" max="180" style="width:80px">°</label>
+          <label>色: <input type="color" id="iwm-color" value="#ffffff"></label>
+          <label>位置: <select id="iwm-position"><option value="center" selected>中央</option><option value="tile">タイル (繰り返し)</option><option value="bottom-right">右下</option></select></label>
+        </div>
+        <div id="iwm-preview" class="img-preview-area"></div>
+        <div class="action-row">
+          <button id="iwm-btn" class="btn primary">透かしを追加してダウンロード</button>
+        </div>
+      </div>
+      <div class="progress-wrapper" id="iwm-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="iwm-progress-fill"></div></div><p class="progress-text" id="iwm-progress-text"></p></div>
+    </div>
+  </div>
+
+  <!-- ミームジェネレーター -->
+  <div id="tool-img-meme" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>ミームジェネレーター</h2>
+      <div class="upload-area" id="meme-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="meme-file-input" accept="image/*" hidden></label>
+      </div>
+      <div id="meme-ui" style="display:none;">
+        <div class="options">
+          <label>上テキスト: <input type="text" id="meme-top" class="text-input" placeholder="上部テキスト"></label>
+          <label>下テキスト: <input type="text" id="meme-bottom" class="text-input" placeholder="下部テキスト"></label>
+          <label>文字サイズ: <input type="number" id="meme-fontsize" class="text-input" value="48" min="12" max="120" style="width:80px"></label>
+          <label>色: <input type="color" id="meme-color" value="#ffffff"></label>
+        </div>
+        <canvas id="meme-canvas" style="max-width:100%;margin:16px 0;border-radius:8px;"></canvas>
+        <div class="action-row">
+          <button id="meme-btn" class="btn primary">ダウンロード</button>
+          <button id="meme-reset-btn" class="btn secondary">別の画像を選択</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 写真エディター -->
+  <div id="tool-img-editor" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>写真エディター</h2>
+      <div class="upload-area" id="ied-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="ied-file-input" accept="image/*" hidden></label>
+      </div>
+      <div id="ied-ui" style="display:none;">
+        <div class="editor-controls">
+          <div class="editor-section">
+            <h4>調整</h4>
+            <label>明るさ: <input type="range" id="ied-brightness" min="-100" max="100" value="0"><span id="ied-brightness-val">0</span></label>
+            <label>コントラスト: <input type="range" id="ied-contrast" min="-100" max="100" value="0"><span id="ied-contrast-val">0</span></label>
+            <label>彩度: <input type="range" id="ied-saturation" min="-100" max="100" value="0"><span id="ied-saturation-val">0</span></label>
+            <label>ぼかし: <input type="range" id="ied-blur" min="0" max="20" value="0"><span id="ied-blur-val">0</span></label>
+          </div>
+          <div class="editor-section">
+            <h4>フィルター</h4>
+            <div class="filter-buttons">
+              <button class="btn small secondary" data-filter="none">なし</button>
+              <button class="btn small secondary" data-filter="grayscale">グレースケール</button>
+              <button class="btn small secondary" data-filter="sepia">セピア</button>
+              <button class="btn small secondary" data-filter="invert">反転</button>
+              <button class="btn small secondary" data-filter="vintage">ヴィンテージ</button>
+              <button class="btn small secondary" data-filter="warm">暖色</button>
+              <button class="btn small secondary" data-filter="cool">寒色</button>
+            </div>
+          </div>
+        </div>
+        <canvas id="ied-canvas" style="max-width:100%;margin:16px 0;border-radius:8px;"></canvas>
+        <div class="action-row">
+          <button id="ied-btn" class="btn primary">保存してダウンロード</button>
+          <button id="ied-reset-btn" class="btn secondary">リセット</button>
+          <button id="ied-back-btn" class="btn secondary">別の画像を選択</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 背景削除 -->
+  <div id="tool-img-bg-remove" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>背景削除</h2>
+      <p class="info-text">画像をクリックして背景色を選択すると、その色の領域を透明にします。</p>
+      <div class="upload-area" id="bgr-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="bgr-file-input" accept="image/*" hidden></label>
+      </div>
+      <div id="bgr-ui" style="display:none;">
+        <div class="options">
+          <label>許容値: <input type="range" id="bgr-tolerance" min="1" max="150" value="30"><span id="bgr-tolerance-value">30</span></label>
+        </div>
+        <p class="info-text">画像をクリックして除去する背景色を選択してください</p>
+        <div id="bgr-canvas-wrapper" class="crop-canvas-wrapper checkerboard">
+          <canvas id="bgr-canvas"></canvas>
+        </div>
+        <div class="action-row">
+          <button id="bgr-undo-btn" class="btn secondary">元に戻す</button>
+          <button id="bgr-btn" class="btn primary">PNGでダウンロード</button>
+          <button id="bgr-reset-btn" class="btn secondary">別の画像を選択</button>
+        </div>
+      </div>
+      <div class="progress-wrapper" id="bgr-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="bgr-progress-fill"></div></div><p class="progress-text" id="bgr-progress-text"></p></div>
+    </div>
+  </div>
+
+  <!-- 顔モザイク -->
+  <div id="tool-img-blur-face" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>顔モザイク</h2>
+      <p class="info-text">画像上をドラッグしてモザイク領域を描画してください。</p>
+      <div class="upload-area" id="iblr-drop-area">
+        <p>画像ファイルをドラッグ&ドロップ<br>または</p>
+        <label class="file-label">ファイルを選択<input type="file" id="iblr-file-input" accept="image/*" hidden></label>
+      </div>
+      <div id="iblr-ui" style="display:none;">
+        <div class="options">
+          <label>モザイク強度: <input type="range" id="iblr-intensity" min="5" max="50" value="20"><span id="iblr-intensity-value">20</span></label>
+          <button id="iblr-undo" class="btn small secondary">元に戻す</button>
+          <button id="iblr-clear" class="btn small danger">全クリア</button>
+        </div>
+        <div id="iblr-canvas-wrapper" class="crop-canvas-wrapper">
+          <canvas id="iblr-canvas"></canvas>
+        </div>
+        <div class="action-row">
+          <button id="iblr-btn" class="btn primary">保存してダウンロード</button>
+          <button id="iblr-reset-btn" class="btn secondary">別の画像を選択</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HTMLから画像 -->
+  <div id="tool-html-to-img" class="tool-view" hidden>
+    <div class="container">
+      <button class="back-btn" data-back>&larr; ツール一覧に戻る</button>
+      <h2>HTMLから画像</h2>
+      <div id="hti-ui">
+        <div class="options">
+          <label>幅: <input type="number" id="hti-width" class="text-input" value="800" min="100" max="3000" style="width:100px">px</label>
+          <label>形式: <select id="hti-format"><option value="png" selected>PNG</option><option value="jpeg">JPEG</option></select></label>
+          <label>背景色: <input type="color" id="hti-bg" value="#ffffff"></label>
+        </div>
+        <textarea id="hti-code" class="html-textarea" rows="12" placeholder="HTMLコードを入力してください...&#10;&#10;例:&#10;<div style='padding:40px;font-family:sans-serif'>&#10;  <h1 style='color:#e74c3c'>Hello World!</h1>&#10;  <p>これは<b>テスト</b>です。</p>&#10;</div>"></textarea>
+        <button id="hti-btn" class="btn primary">画像に変換</button>
+      </div>
+      <div id="hti-result" style="display:none;">
+        <img id="hti-preview-img" style="max-width:100%;border-radius:8px;margin:16px 0;box-shadow:0 2px 12px rgba(0,0,0,.1);">
+        <div class="action-row">
+          <button id="hti-download" class="btn primary">ダウンロード</button>
+          <button id="hti-retry" class="btn secondary">コードを修正</button>
+        </div>
+      </div>
+      <div class="progress-wrapper" id="hti-progress" style="display:none;"><div class="progress-bar"><div class="progress-fill" id="hti-progress-fill"></div></div><p class="progress-text" id="hti-progress-text"></p></div>
+    </div>
+  </div>
+
+  <!-- ===== Scripts ===== -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     // ===== Navigation =====
     function showTool(toolId) {
@@ -347,7 +797,23 @@
       document.getElementById(fillId).style.width = pct + '%';
       document.getElementById(textId).textContent = text;
     }
+    // Helper: load image from file → returns { img, dataUrl }
+    function loadImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => resolve({ img, dataUrl: reader.result, name: file.name, width: img.naturalWidth, height: img.naturalHeight });
+          img.onerror = () => reject(new Error('画像を読み込めませんでした'));
+          img.src = reader.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
   </script>
+
+  <!-- PDF tools -->
   <script src="js/pdf-to-png.js" type="module"></script>
   <script src="js/pdf-merge.js"></script>
   <script src="js/pdf-split.js"></script>
@@ -359,5 +825,19 @@
   <script src="js/pdf-pagenums.js"></script>
   <script src="js/pdf-watermark.js"></script>
   <script src="js/pdf-compress.js" type="module"></script>
+
+  <!-- Image tools -->
+  <script src="js/img-upscale.js"></script>
+  <script src="js/img-compress-img.js"></script>
+  <script src="js/img-resize.js"></script>
+  <script src="js/img-crop.js"></script>
+  <script src="js/img-convert.js"></script>
+  <script src="js/img-rotate-img.js"></script>
+  <script src="js/img-watermark-img.js"></script>
+  <script src="js/img-meme.js"></script>
+  <script src="js/img-editor.js"></script>
+  <script src="js/img-bg-remove.js"></script>
+  <script src="js/img-blur-face.js"></script>
+  <script src="js/html-to-img.js"></script>
 </body>
 </html>
